@@ -14,12 +14,14 @@ Este módulo instrui o Gemini CLI a operar com uma mentalidade de arquiteto visu
 - **Z-Indexing (IndexKey):** Gerencie a profundidade e a ordem de sobreposição de elementos de forma lógica, garantindo que o fluxo visual faça sentido.
 
 ## 2. Interface Baseada em Dados (PURE DATA UI)
-- **Shapes como Registros:** Trate componentes de interface como registros de dados puros (`records`). A UI deve ser uma projeção direta desses dados.
-- **Efeitos Colaterais de Registro:** Pense em como a mudança em um elemento afeta seus "vizinhos" ou "conectores" (ex: mover um botão deve reajustar as setas de fluxo de dados).
-- **Validação de Estado:** Sempre valide se a estrutura da interface (o "grafo" visual) é consistente antes de realizar mudanças em larga escala.
+- **Shapes como Registros:** Trate componentes de interface como registros de dados puros (`records`) em uma `Store` descentralizada.
+- **Signal-based Reactivity:** Utilize `Atoms` para estados mutáveis e `Computed` para geometrias derivadas (via `@tldraw/state`). Isso evita re-renderizações globais, focando apenas no que mudou no espaço 2D.
+- **Efeitos Colaterais de Registro:** Pense em como a mudança em um elemento afeta seus "vizinhos" ou "conectores" via assinaturas de sinais.
+- **Validação de Estado:** Utilize esquemas de migração para registros, garantindo que versões antigas de formas visuais sejam compatíveis com o novo motor gráfico.
 
 ## 3. Fluxo de Trabalho de Design Visual
 - **Canvas Infinito:** Aborde problemas complexos como se estivesse em um canvas infinito. Não se limite a telas pequenas; mapeie todo o ecossistema do problema visualmente.
+- **ShapeUtil Pattern:** Para cada novo elemento visual, defina um `ShapeUtil` que encapsula a renderização (SVG/HTML) e a lógica de intersecção/colisão.
 - **SVG Thinking:** Prefira gerar ou manipular SVGs para representações gráficas, aproveitando a natureza baseada em vetores e dados do motor do tldraw.
 - **State Machine Tools:** Ao interagir com ferramentas ou sub-agentes, defina estados claros (ex: `IDLE`, `SELECTING`, `EDITING`) para evitar comportamentos inesperados.
 
