@@ -1,6 +1,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { WeaveResult, MetatronNode } from './types/metatron';
 import { Logger } from './utils/logger';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class MetatronLedger {
   private supabase: SupabaseClient;
@@ -15,6 +17,52 @@ export class MetatronLedger {
         }
       }
     });
+  }
+
+  /**
+   * Indexa todas as skills locais no Grafo de Conhecimento do Metatron.
+   */
+  public async indexSkills(skillsDir: string): Promise<void> {
+    Logger.info(`🌌 Metatron indexando skills em: ${skillsDir}`);
+    
+    if (!fs.existsSync(skillsDir)) {
+      Logger.warn(`Diretório de skills não encontrado: ${skillsDir}`);
+      return;
+    }
+
+    const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
+    const skills: MetatronNode[] = [];
+
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        const skillFile = path.join(skillsDir, entry.name, 'SKILL.md');
+        if (fs.existsSync(skillFile)) {
+          const content = fs.readFileSync(skillFile, 'utf8');
+          
+          // Extração Simples de Metadados (Name, Tags, Category)
+          const nameMatch = content.match(/name:\s*(.*)/);
+          const tagsMatch = content.match(/tags:\s*"(.*)"/);
+          const categoryMatch = content.match(/category:\s*(.*)/);
+
+          skills.push({
+            name: nameMatch ? `@${nameMatch[1].trim()}` : `@${entry.name}`,
+            type: 'SKILL',
+            metadata: {
+              path: skillFile,
+              tags: tagsMatch ? tagsMatch[1].split(',').map(t => t.trim()) : [],
+              category: categoryMatch ? categoryMatch[1].trim() : 'general'
+            }
+          });
+        }
+      }
+    }
+
+    if (skills.length > 0) {
+      Logger.info(`✨ ${skills.length} skills identificadas. Imortalizando no Ledger...`);
+      await this.saveWeave({ nodes: skills, links: [] });
+    } else {
+      Logger.warn('Nenhuma skill encontrada para indexação.');
+    }
   }
 
   public async saveWeave(result: WeaveResult): Promise<void> {
