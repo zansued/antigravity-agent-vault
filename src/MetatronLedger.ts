@@ -1,66 +1,93 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { WeaveResult } from './types/metatron';
+import { WeaveResult, MetatronNode } from './types/metatron';
+import { Logger } from './utils/logger';
 
-/**
- * MetatronLedger: O Livro de Metatron.
- * Persiste o conhecimento extraído no Supabase TechStore Brasil.
- */
 export class MetatronLedger {
   private supabase: SupabaseClient;
 
   constructor(url: string, key: string) {
     this.supabase = createClient(url, key, {
-      db: { schema: 'public' }
+      db: { schema: 'public' },
+      global: {
+        headers: {
+          'Content-Profile': 'public',
+          'Accept-Profile': 'public'
+        }
+      }
     });
   }
 
-  /**
-   * Grava nodos e links no banco de dados celestial.
-   */
   public async saveWeave(result: WeaveResult): Promise<void> {
-    console.log('[Metatron] Gravando nodos no Livro Celestial...');
-    const nodeMap = new Map<string, string>(); // name -> uuid
+    Logger.divider();
+    if (!result.nodes.length && !result.links.length) {
+      Logger.warn('Nenhum dado para imortalizar no Ledger.');
+      return;
+    }
 
-    // 1. Upsert de Nodos (Garante que o nome é único e retorna o ID)
-    for (const node of result.nodes) {
-      const { data, error } = await this.supabase
+    Logger.info('Iniciando imortalização em lote (Batch)...');
+    const nodeMap = new Map<string, string>();
+
+    // 1. Inserção em Lote (Batch Upsert) para Nodes
+    if (result.nodes.length > 0) {
+       Logger.dim(`Processando ${result.nodes.length} Nodos Universais...`);
+       const { data, error } = await this.supabase
         .from('geminicli_knowledge_nodes')
-        .upsert({ name: node.name, type: node.type, metadata: node.metadata }, { onConflict: 'name' })
-        .select('id')
-        .single();
-      
-      if (!error && data) {
-        nodeMap.set(node.name, data.id);
-      } else if (error) {
-        console.error(`[Metatron] Erro ao gravar nodo ${node.name}:`, error.message);
-      }
+        .upsert(
+          result.nodes.map(node => ({
+            name: node.name,
+            type: node.type,
+            metadata: node.metadata || {}
+          })), 
+          { onConflict: 'name' }
+        )
+        .select('id, name');
+
+       if (error) {
+         Logger.error('Falha crítica no Batch Upsert de Nodes:', error.message);
+       } else if (data) {
+         data.forEach(row => nodeMap.set(row.name, row.id));
+       }
+
+       const missingNodes = result.nodes.filter(n => !nodeMap.has(n.name));
+       if (missingNodes.length > 0) {
+         const { data: existingData } = await this.supabase
+           .from('geminicli_knowledge_nodes')
+           .select('id, name')
+           .in('name', missingNodes.map(n => n.name));
+           
+         if (existingData) {
+           existingData.forEach(row => nodeMap.set(row.name, row.id));
+         }
+       }
     }
 
-    console.log('[Metatron] Tecendo as Linhas de Ley (Conexões)...');
-    // 2. Insert de Links (Linhas de Ley)
-    for (const link of result.links) {
-      const sourceId = nodeMap.get(link.sourceName);
-      const targetId = nodeMap.get(link.targetName);
+    // 2. Inserção em Lote (Batch Upsert) para Links
+    if (result.links.length > 0) {
+      Logger.dim(`Tecendo ${result.links.length} Linhas de Ley (Conexões)...`);
       
-      if (sourceId && targetId) {
-        const { error } = await this.supabase
-          .from('geminicli_agent_events') // Opcional: Registrar no histórico também
-          .insert([{ 
-            session_id: 'metatron-sync', 
-            type: 'ACTION', 
-            event_type: 'KNOWLEDGE_LINK', 
-            payload: link 
-          }]);
+      const linkPayloads = result.links.map(link => {
+        const sourceId = nodeMap.get(link.sourceName);
+        const targetId = nodeMap.get(link.targetName);
+        if (sourceId && targetId) {
+          return { source_id: sourceId, target_id: targetId, relation_type: link.relationType };
+        }
+        return null;
+      }).filter(Boolean);
 
-        await this.supabase
+      if (linkPayloads.length > 0) {
+        const { error: linkError } = await this.supabase
           .from('geminicli_knowledge_links')
-          .upsert({ 
-            source_id: sourceId, 
-            target_id: targetId, 
-            relation_type: link.relationType 
-          }, { onConflict: 'source_id,target_id,relation_type' });
+          .upsert(linkPayloads, { onConflict: 'source_id,target_id,relation_type' });
+          
+        if (linkError) {
+           Logger.error('Falha ao gravar links em lote:', linkError.message);
+        }
+      } else {
+        Logger.warn('Nenhum link válido para imortalizar (nodos não resolvidos).');
       }
     }
-    console.log('[Metatron] Conhecimento imortalizado com sucesso.');
+
+    Logger.success('Conhecimento imortalizado com sucesso nas estrelas (Supabase).');
+    Logger.divider();
   }
 }
