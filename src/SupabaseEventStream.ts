@@ -67,7 +67,7 @@ export class SupabaseEventStream implements EventStream {
   public subscribe(callback: (event: Action | Observation) => void): () => void {
     const channel = this.supabase
       .channel(`session:${this.sessionId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'geminicli_agent_events' }, (payload: any) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'geminicli_agent_events' }, (payload) => {
         callback(payload.new as any);
       })
       .subscribe();

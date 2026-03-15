@@ -3,14 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Terminal, Send, Command, Bot, User, Code, Activity } from 'lucide-react'
 import { VoiceLoader } from './VoiceLoader'
 import { chatWithMetatron } from '../services/deepseek'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { BoltParser, Artifact } from '../utils/BoltParser'
 import { io, Socket } from 'socket.io-client'
-
-const supabase = createSupabaseClient(
-  'https://supa.techstorebrasil.com',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE3MTgwOTUyMDAKfQ.1w168CO-icK3_NsOLyNllE35tVAKmv5ygfnE_AgbMGs'
-)
+import { supabase } from '../lib/supabase'
+import VoiceInterface from './VoiceInterface'
+import { useVoiceCommands } from '../hooks/useVoiceCommands'
 
 interface RealtimeLog {
   type: 'info' | 'success' | 'stdout' | 'stderr'
@@ -89,7 +86,7 @@ export function RitualConsole() {
       event: '*', 
       schema: 'public',
       table: 'geminicli_knowledge_nodes'
-    }, (payload) => {
+    }, (payload: any) => {
       console.log('[Supabase Realtime] Node change detected directly:', payload);
       // Atualiza o estado dos nodos com a mudança recebida do Supabase
       setNodes(prevNodes => {
@@ -102,7 +99,7 @@ export function RitualConsole() {
         }
         return prevNodes;
       });
-    }).subscribe((status) => {
+    }).subscribe((status: string) => {
       if (status === 'SUBSCRIBED') {
         console.log('[Supabase Realtime] Inscrito com sucesso nos nodos diretamente.');
       } else {
@@ -136,12 +133,22 @@ export function RitualConsole() {
         }
       }
     }
-  }
+  };
 
-  const handleSend = async () => {
-    if (!input.trim() || isProcessing) return
+  const { processText } = useVoiceCommands((cmd) => {
+    if (cmd === 'clear') {
+      setMessages([{ role: 'metatron', content: 'Console limpo, Mestre.', timestamp: new Date() }]);
+    } else {
+      setInput(cmd);
+      handleSendDirect(cmd);
+    }
+  });
+
+  const handleSendDirect = async (overrideValue?: string) => {
+    const value = overrideValue || input;
+    if (!value.trim() || isProcessing) return
     
-    const userMsg: Message = { role: 'user', content: input, timestamp: new Date() }
+    const userMsg: Message = { role: 'user', content: value, timestamp: new Date() }
     setMessages(prev => [...prev, userMsg])
     setInput('')
     setIsProcessing(true)
@@ -149,7 +156,7 @@ export function RitualConsole() {
     setCurrentLogs([]);
 
     try {
-      const response = await chatWithMetatron(input, nodes)
+      const response = await chatWithMetatron(value, nodes)
       const artifacts = BoltParser.parse(response);
       
       if (artifacts.length > 0) {
@@ -160,7 +167,7 @@ export function RitualConsole() {
           timestamp: new Date(),
           artifacts,
           logs: currentLogs
-        }])
+        }]);
       } else {
         setMessages(prev => [...prev, { role: 'metatron', content: response, timestamp: new Date() }])
       }
@@ -171,7 +178,9 @@ export function RitualConsole() {
     } finally {
       setIsProcessing(false)
     }
-  }
+  };
+
+  const handleSend = () => handleSendDirect();
 
   return (
     <div className="flex-1 flex flex-col p-8 relative overflow-hidden">
@@ -282,6 +291,18 @@ export function RitualConsole() {
             <Send className="w-5 h-5" />
           </button>
         </div>
+      </div>
+
+      {/* Floating Voice Interface - Moved to clear sidebar and registry panel */}
+      <div className="fixed bottom-10 left-24 w-80 z-[100] block">
+        <VoiceInterface 
+          onCommand={(cmd) => {
+            const processed = processText(cmd);
+            if (!processed) {
+              handleSendDirect(cmd);
+            }
+          }}
+        />
       </div>
     </div>
   )
