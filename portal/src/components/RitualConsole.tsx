@@ -293,8 +293,8 @@ export function RitualConsole() {
         </div>
       </div>
 
-      {/* Floating Voice Interface */}
-      <div className="fixed bottom-8 right-8 w-80 z-40 hidden xl:block">
+      {/* Floating Voice Interface - Moved to clear sidebar and registry panel */}
+      <div className="fixed bottom-10 left-24 w-80 z-[100] block">
         <VoiceInterface 
           onCommand={(cmd) => {
             const processed = processText(cmd);
