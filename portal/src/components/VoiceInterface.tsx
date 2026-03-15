@@ -189,29 +189,66 @@ const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListenin
       </div>
 
       {/* Transcript Display */}
-      <div className="mb-4 p-3 bg-black/40 rounded-xl border border-white/5 min-h-[40px]">
-         <p className="text-xs text-slate-400 italic">
-           {transcript || (listening ? "Ouvindo constelações..." : "Microfone desligado")}
-         </p>
+      <div className="relative mb-4 group">
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-celestial-neon/20 to-celestial-magic/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
+        <div className="relative p-3 bg-black/60 rounded-xl border border-white/5 min-h-[60px] flex flex-col justify-center overflow-hidden">
+          {listening && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 flex items-end justify-around px-2 opacity-50">
+              {[...Array(20)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ 
+                    height: [2, Math.random() * 15 + 5, 2],
+                    backgroundColor: i % 2 === 0 ? '#22d3ee' : '#818cf8'
+                  }}
+                  transition={{ 
+                    duration: 0.5 + Math.random() * 0.5, 
+                    repeat: Infinity,
+                    ease: "easeInOut" 
+                  }}
+                  className="w-[2px] rounded-full"
+                />
+              ))}
+            </div>
+          )}
+          <p className="text-[11px] text-slate-300 italic font-medium leading-relaxed">
+            {transcript || (listening ? "Ouvindo as constelações do código..." : "O Metatron aguarda seu chamado.")}
+          </p>
+        </div>
       </div>
 
       {/* Volume & History */}
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <Volume2 className="w-3 h-3 text-slate-500" />
-          <input 
-            type="range" min="0" max="1" step="0.1" value={volume} 
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-celestial-neon"
-          />
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 group">
+            <Volume2 className="w-3.5 h-3.5 text-slate-400 group-hover:text-celestial-neon transition-colors" />
+          </div>
+          <div className="flex-1 relative h-6 flex items-center">
+            <input 
+              type="range" min="0" max="1" step="0.05" value={volume} 
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-celestial-neon z-10"
+            />
+            <div 
+              className="absolute left-0 h-1 bg-gradient-to-r from-celestial-neon to-celestial-magic rounded-lg pointer-events-none"
+              style={{ width: `${volume * 100}%` }}
+            />
+          </div>
         </div>
 
-        <div className="space-y-1 max-h-[100px] overflow-y-auto custom-scrollbar">
-          {voiceHistory.map((entry, i) => (
-            <div key={i} className="text-[10px] text-slate-500 border-l border-white/5 pl-2 py-0.5">
-              {entry}
-            </div>
-          ))}
+        <div className="space-y-1.5 max-h-[120px] overflow-y-auto custom-scrollbar pr-1">
+          <AnimatePresence initial={false}>
+            {voiceHistory.map((entry, i) => (
+              <motion.div 
+                key={i + entry}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="text-[10px] text-slate-500 border-l-2 border-celestial-neon/20 pl-3 py-1 bg-white/[0.02] rounded-r-lg hover:bg-white/[0.05] transition-colors"
+              >
+                {entry}
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
     </div>

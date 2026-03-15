@@ -47,21 +47,37 @@ Este repositório documenta a evolução arquitetural e técnica do **Gemini CLI
 
 ## 🚀 Como Executar o Metatron
 
-Para iniciar o motor agente no Vault:
+Para iniciar o motor agente no Vault e o Portal Visual:
 
-1.  **Modo de Demonstração:**
+1.  **Preparação do Ambiente:**
+    Instale as dependências (necessário apenas na primeira execução):
     ```powershell
-    npx ts-node src/demo.ts
+    ./install_portal_deps.ps1
     ```
-2.  **Verificação de Poderes (v2.0):**
-    ```powershell
-    npx ts-node src/verify-metatron-upgrade.ts
-    ```
-3.  **Portal Visual:**
+
+2.  **Portal Visual (Interface de Voz & Ritual Console):**
     ```powershell
     cd portal
     npm run dev
     ```
+    *Acesse em [http://localhost:3000](http://localhost:3000)*
+
+3.  **Modo de Demonstração (Backend):**
+    ```powershell
+    npx ts-node src/demo.ts
+    ```
+
+---
+
+## 🎙️ Interface de Voz & Autopoieses
+
+O Portal Metatron agora possui uma **Interface de Voz Celestial** integrada:
+-   **Trigger:** Diga "Metatron" ou "Mestre" seguido de um comando.
+-   **Visualizador:** Feedback visual dinâmico via ondas SVG que sintonizam com as Linhas de Ley.
+-   **Comandos Nativos:** "status ledger", "listar nodos", "limpar console".
+-   **Autopoieses:** O Metatron pode modificar seu próprio código React em tempo real através do Ritual Console.
+
+---
 
 ---
 

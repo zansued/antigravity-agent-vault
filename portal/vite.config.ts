@@ -5,9 +5,6 @@ import path from 'path'
 import { exec } from 'child_process'
 import { Server } from 'socket.io'
 // Importação corrigida para módulos CommonJS
-import supabaseRealtime from '@supabase/realtime-js'
-const { createClient } = supabaseRealtime
-
 // Plugin para permitir que o Metatron modifique seu próprio código e instale pacotes
 function metatronAutopoiesisPlugin(): PluginOption {
   let io: Server;
@@ -17,15 +14,16 @@ function metatronAutopoiesisPlugin(): PluginOption {
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE3MTgwOTUyMDAKfQ.1w168CO-icK3_NsOLyNllE35tVAKmv5ygfnE_AgbMGs';
 
   // Função para inicializar o cliente Supabase com Realtime
-  const initSupabaseRealtime = () => {
+  const initSupabaseRealtime = async () => {
+    // Importação dinâmica para evitar quebra no build (executa apenas no server)
+    const { createClient } = await import('@supabase/realtime-js') as any;
     return createClient(SUPABASE_URL, SUPABASE_KEY, {
       realtime: { params: { directly: true } },
-      auth: { autoEncryptSession: true },
     });
   };
 
   // Função para configurar a subscrição de mudanças
-  const subscribeToChanges = (supabase) => {
+  const subscribeToChanges = (supabase: any) => {
     const channel = supabase.channel('metatron-realtime-changes', { 
       config: { 
         broadcast: { self: true }, 
@@ -38,7 +36,7 @@ function metatronAutopoiesisPlugin(): PluginOption {
       event: '*', // Escuta todos os eventos
       schema: 'public',
       table: 'geminicli_knowledge_nodes'
-    }, (payload) => {
+    }, (payload: any) => {
       console.log('[Supabase Realtime] Node change detected:', payload);
       // Emite o evento para o Socket.io
       if (io) {
@@ -50,13 +48,13 @@ function metatronAutopoiesisPlugin(): PluginOption {
       event: '*', 
       schema: 'public',
       table: 'geminicli_knowledge_links'
-    }, (payload) => {
+    }, (payload: any) => {
       console.log('[Supabase Realtime] Link change detected:', payload);
       if (io) {
         io.emit('link_update', payload.new);
       }
     })
-    .subscribe((status) => {
+    .subscribe((status: any) => {
       if (status === 'SUBSCRIBED') {
         console.log('[Supabase Realtime] Inscrito com sucesso nos canais.');
       } else {
@@ -70,6 +68,8 @@ function metatronAutopoiesisPlugin(): PluginOption {
   return {
     name: 'metatron-autopoiesis',
     async configureServer(server) {
+      if (!server.httpServer) return;
+
       // Inicializa o Socket.io no servidor do Vite
       io = new Server(server.httpServer, {
         cors: { origin: "*" }
@@ -82,7 +82,7 @@ function metatronAutopoiesisPlugin(): PluginOption {
 
       // Inicializa o cliente Supabase Realtime e se inscreve nas mudanças
       // É importante garantir que a chave de presença seja dinâmica ou configurável
-      supabaseClient = initSupabaseRealtime();
+      supabaseClient = await initSupabaseRealtime();
       subscribeToChanges(supabaseClient);
 
       server.middlewares.use(async (req, res, next) => {
@@ -142,10 +142,18 @@ function metatronAutopoiesisPlugin(): PluginOption {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react(), metatronAutopoiesisPlugin()],
-  server: {
-    port: 3000,
-    host: true
+export default defineConfig(({ command }) => {
+  const plugins: PluginOption[] = [react()];
+  
+  if (command === 'serve') {
+    plugins.push(metatronAutopoiesisPlugin());
+  }
+
+  return {
+    plugins,
+    server: {
+      port: 3000,
+      host: true
+    }
   }
 })
