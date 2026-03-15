@@ -10,6 +10,7 @@ import VoiceInterface from './VoiceInterface'
 import { useVoiceCommands } from '../hooks/useVoiceCommands'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { neuralVoice } from '../services/voice/NeuralVoice'
 
 interface RealtimeLog {
   type: 'info' | 'success' | 'stdout' | 'stderr'
@@ -121,6 +122,7 @@ export function RitualConsole() {
     }]);
     setCurrentLogs([]);
     setIsProcessing(false);
+    window.speechSynthesis.cancel(); // Stop any pending speech
   };
 
   const handleSendDirect = async (overrideValue?: string) => {
@@ -148,8 +150,10 @@ export function RitualConsole() {
           artifacts,
           logs: currentLogs
         }]);
+        neuralVoice.speak('As Runas foram tecidas com sucesso. O fluxo de dados está em tempo real.');
       } else {
         setMessages(prev => [...prev, { role: 'metatron', content: response, timestamp: new Date() }])
+        neuralVoice.speak(response);
       }
 
     } catch (error) {
