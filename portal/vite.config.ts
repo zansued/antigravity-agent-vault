@@ -17,9 +17,10 @@ function metatronAutopoiesisPlugin(): PluginOption {
   const initSupabaseRealtime = async () => {
     // Importação dinâmica para evitar quebra no build (executa apenas no server)
     const { RealtimeClient } = await import('@supabase/realtime-js') as any;
-    // Converte https para wss e garante o sufixo /realtime/v1/websocket
-    const wsUrl = SUPABASE_URL.replace('http', 'ws') + '/realtime/v1/websocket';
-    return new RealtimeClient(wsUrl, {
+    // O RealtimeClient espera a URL base (sem /realtime/v1/websocket se o cliente for v2+)
+    // Em alguns casos de self-hosted, pode precisar de /realtime/v1
+    const realtimeUrl = `${SUPABASE_URL}/realtime/v1`;
+    return new RealtimeClient(realtimeUrl, {
       params: { apikey: SUPABASE_KEY },
       headers: { apikey: SUPABASE_KEY }
     });
