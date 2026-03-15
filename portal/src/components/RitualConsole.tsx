@@ -77,42 +77,8 @@ export function RitualConsole() {
       // Futuramente, adicionar lógica para atualizar ou adicionar links no estado se necessário.
     });
 
-    // Conectar e Inscrever no Supabase Realtime diretamente
-    const channelName = `metatron-nodes-${Math.random().toString(36).substring(7)}`;
-    const channel = supabase.channel(channelName);
-
-    channel.on('postgres_changes', {
-      event: '*', 
-      schema: 'public',
-      table: 'geminicli_knowledge_nodes'
-    }, (payload: any) => {
-      console.log('[Supabase Realtime] Node change detected directly:', payload);
-      // Atualiza o estado dos nodos com a mudança recebida do Supabase
-      setNodes(prevNodes => {
-        if (payload.eventType === 'INSERT') {
-          return [...prevNodes, payload.new as SupabaseNode];
-        } else if (payload.eventType === 'UPDATE') {
-          return prevNodes.map(node => node.id === payload.new.id ? payload.new as SupabaseNode : node);
-        } else if (payload.eventType === 'DELETE') {
-          return prevNodes.filter(node => node.id !== payload.old.id);
-        }
-        return prevNodes;
-      });
-    }).subscribe((status: string, err?: any) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('[Supabase Realtime] Inscrito com sucesso nos nodos diretamente.');
-      } else {
-        console.error(`[Supabase Realtime] Erro na inscrição direta (${status}):`, err);
-        if (status === 'CHANNEL_ERROR') {
-          console.warn('[Metatron] Tentando reconectar Linhas de Ley...');
-          setTimeout(() => channel.subscribe(), 5000);
-        }
-      }
-    });
-
     return () => {
       socket.disconnect();
-      supabase.removeChannel(channel);
     }
   }, []) // Dependência vazia para executar apenas na montagem
 

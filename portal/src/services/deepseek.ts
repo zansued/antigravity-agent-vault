@@ -20,7 +20,10 @@ export async function chatWithMetatron(message: string, contextNodes: any[], his
 
   const messages = [
     { role: "system", content: systemPrompt },
-    ...history.slice(-10), // Mantém apenas as últimas 10 para não estourar o contexto
+    ...history.slice(-10).map(m => ({
+      role: m.role === 'metatron' ? 'assistant' : m.role,
+      content: m.content
+    })),
     { role: "user", content: message }
   ];
 

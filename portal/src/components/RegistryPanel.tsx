@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from '../lib/supabase'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   Brain, 
@@ -18,10 +18,6 @@ import {
   Info
 } from 'lucide-react'
 
-const supabase = createClient(
-  'https://supa.techstorebrasil.com',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE4NzI4MTcyMDAKfQ.1w168CO-icK3_NsOLyNllE35tVAKmv5ygfnE_AgbMGs'
-)
 
 const getNodeConfig = (type: string) => {
   const normalizedType = (type || '').toUpperCase()
