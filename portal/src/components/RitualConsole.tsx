@@ -139,13 +139,23 @@ export function RitualConsole() {
   };
 
   const { processText } = useVoiceCommands((cmd) => {
-    if (cmd === 'clear') {
-      setMessages([{ role: 'metatron', content: 'Console limpo, Mestre.', timestamp: new Date() }]);
+    if (cmd === 'clear' || cmd === 'resetar' || cmd === 'nova conversa') {
+      resetConversation();
     } else {
       setInput(cmd);
       handleSendDirect(cmd);
     }
   });
+
+  const resetConversation = () => {
+    setMessages([{ 
+      role: 'metatron', 
+      content: 'As Linhas de Ley foram redefinidas. Uma nova tecelagem começa agora, Mestre. O que deseja criar?', 
+      timestamp: new Date() 
+    }]);
+    setCurrentLogs([]);
+    setIsProcessing(false);
+  };
 
   const handleSendDirect = async (overrideValue?: string) => {
     const value = overrideValue || input;
@@ -159,7 +169,8 @@ export function RitualConsole() {
     setCurrentLogs([]);
 
     try {
-      const response = await chatWithMetatron(value, nodes)
+      const history = messages.map(m => ({ role: m.role, content: m.content }));
+      const response = await chatWithMetatron(value, nodes, history)
       const artifacts = BoltParser.parse(response);
       
       if (artifacts.length > 0) {
@@ -202,6 +213,13 @@ export function RitualConsole() {
           <h1 className="text-3xl font-black italic tracking-tighter text-white uppercase">
             Console de Ritual
           </h1>
+          <button 
+            onClick={resetConversation}
+            className="ml-auto flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest"
+          >
+            <Activity size={12} />
+            Nova Conversa
+          </button>
         </motion.div>
       </div>
 
