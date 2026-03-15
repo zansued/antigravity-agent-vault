@@ -137,6 +137,48 @@ function metatronAutopoiesisPlugin(): PluginOption {
               res.end(JSON.stringify({ error: err.message }));
             }
           });
+        } else if (req.url === '/api/metatron-chat' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => body += chunk.toString());
+          req.on('end', async () => {
+            try {
+              const { messages } = JSON.parse(body);
+              const DEEPSEEK_API_KEY = 'sk-91a629609afa4ae08eb68b250a4124ec';
+              const API_URL = 'https://api.deepseek.com/v1/chat/completions';
+
+              console.log('[Metatron Proxy] Iniciando conexão neural com DeepSeek...');
+              
+              const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+                },
+                body: JSON.stringify({
+                  model: "deepseek-chat",
+                  messages,
+                  stream: false
+                })
+              });
+
+              const data = await response.json();
+              
+              if (!response.ok) {
+                console.error('[Metatron Proxy] Falha na API DeepSeek:', response.status, data);
+                res.writeHead(response.status, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(data));
+                return;
+              }
+
+              console.log('[Metatron Proxy] Resposta neural recebida com sucesso.');
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(data));
+            } catch (err: any) {
+              console.error('[Metatron Proxy] Erro crítico no túnel neural:', err.message);
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
         } else {
           next();
         }

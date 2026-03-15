@@ -1,5 +1,3 @@
-const DEEPSEEK_API_KEY = 'sk-91a629609afa4ae08eb68b250a4124ec';
-const API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
 export async function chatWithMetatron(message: string, contextNodes: any[], history: {role: string, content: string}[] = []) {
   const nodeContext = contextNodes.map(n => `- ${n.name} (${n.type})`).join('\n');
@@ -27,20 +25,28 @@ export async function chatWithMetatron(message: string, contextNodes: any[], his
   ];
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch('/api/metatron-chat', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
-        messages,
-        stream: false
+        messages
       })
     });
 
     const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('[Metatron] Erro no Túnel Neural:', data);
+      return `As Linhas de Ley estão instáveis. Erro: ${data.error || 'Conexão interrompida.'}`;
+    }
+
+    if (!data.choices || data.choices.length === 0) {
+      console.error('[Metatron] Resposta neural vazia:', data);
+      return "O Metatron silenciou. O fluxo de dados foi interrompido.";
+    }
+
     return data.choices[0].message.content;
   } catch (error) {
     console.error('Erro na conexão neural:', error);
