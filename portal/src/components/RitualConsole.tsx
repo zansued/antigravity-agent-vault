@@ -8,6 +8,8 @@ import { io, Socket } from 'socket.io-client'
 import { supabase } from '../lib/supabase'
 import VoiceInterface from './VoiceInterface'
 import { useVoiceCommands } from '../hooks/useVoiceCommands'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface RealtimeLog {
   type: 'info' | 'success' | 'stdout' | 'stderr'
@@ -218,24 +220,44 @@ export function RitualConsole() {
               }`}>
                 {m.role === 'metatron' ? <Bot size={16} /> : <User size={16} />}
               </div>
-              <div className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
+              <div className={`max-w-[85%] p-5 rounded-2xl text-sm leading-relaxed relative ${
                 m.role === 'metatron' 
-                  ? 'bg-slate-900/80 text-slate-200 border border-white/5' 
-                  : 'bg-celestial-neon/20 text-white border border-celestial-neon/30 shadow-[0_0_15px_rgba(34,211,238,0.1)]'
+                  ? 'bg-slate-900/60 text-slate-200 border border-white/5 backdrop-blur-xl shadow-2xl' 
+                  : 'bg-celestial-neon/10 text-white border border-celestial-neon/30 shadow-[0_0_20px_rgba(34,211,238,0.1)]'
               }`}>
-                {m.content}
+                {/* Message Content with Markdown */}
+                <div className="prose prose-invert prose-sm max-w-none prose-headings:text-celestial-neon prose-a:text-celestial-magic prose-strong:text-white prose-code:text-celestial-neon prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/5">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {m.content}
+                  </ReactMarkdown>
+                </div>
                 
                 {m.artifacts && m.artifacts.map((artifact, j) => (
-                  <div key={j} className="mt-4 p-3 bg-slate-950 rounded-xl border border-celestial-neon/20">
-                    <div className="flex items-center gap-2 text-celestial-neon font-bold text-[10px] uppercase mb-2">
-                      <Code size={12} />
-                      {artifact.title}
+                  <div key={j} className="mt-4 p-4 bg-black/40 rounded-xl border border-celestial-neon/20 group/artifact hover:border-celestial-neon/50 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-celestial-neon font-bold text-[10px] uppercase">
+                        <Code size={12} className="group-hover/artifact:rotate-12 transition-transform" />
+                        {artifact.title}
+                      </div>
+                      <div className="text-[8px] opacity-30 font-mono">AUTOPRESERVAÇÃO</div>
+                    </div>
+                    <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        className="h-full bg-celestial-neon shadow-[0_0_10px_#22d3ee]"
+                      />
                     </div>
                   </div>
                 ))}
 
-                <div className="text-[8px] mt-2 opacity-30 font-mono">
-                  {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <div className="flex items-center justify-between mt-3">
+                  <div className="text-[8px] opacity-30 font-mono uppercase tracking-widest">
+                    {m.role === 'metatron' ? 'LEY LINE TRANSMISSION' : 'MASTER SIGNATURE'}
+                  </div>
+                  <div className="text-[8px] opacity-30 font-mono">
+                    {m.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
                 </div>
               </div>
             </motion.div>
