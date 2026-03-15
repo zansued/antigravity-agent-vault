@@ -37,9 +37,11 @@ exports.MetatronCache = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const crypto_1 = require("crypto");
+const logger_1 = require("./utils/logger");
 class MetatronCache {
     cachePath;
     cache = {};
+    saveTimeout = null;
     constructor(basePath) {
         this.cachePath = path.join(basePath, 'metatron-cache.json');
         this.loadCache();
@@ -50,12 +52,26 @@ class MetatronCache {
                 this.cache = JSON.parse(fs.readFileSync(this.cachePath, 'utf-8'));
             }
             catch (e) {
+                logger_1.Logger.warn('Falha ao ler cache. Inicializando vazio.');
                 this.cache = {};
             }
         }
     }
     saveCache() {
-        fs.writeFileSync(this.cachePath, JSON.stringify(this.cache, null, 2));
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        this.saveTimeout = setTimeout(() => {
+            try {
+                fs.writeFile(this.cachePath, JSON.stringify(this.cache, null, 2), (err) => {
+                    if (err)
+                        logger_1.Logger.error('Erro ao salvar cache no disco:', err);
+                });
+            }
+            catch (e) {
+                logger_1.Logger.error('Erro de serialização no cache:', e);
+            }
+        }, 1000);
     }
     getHash(text) {
         return (0, crypto_1.createHash)('md5').update(text).digest('hex');
@@ -71,7 +87,9 @@ class MetatronCache {
     }
     clear() {
         this.cache = {};
-        this.saveCache();
+        if (this.saveTimeout)
+            clearTimeout(this.saveTimeout);
+        fs.writeFileSync(this.cachePath, JSON.stringify(this.cache, null, 2));
     }
 }
 exports.MetatronCache = MetatronCache;

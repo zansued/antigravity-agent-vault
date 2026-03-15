@@ -2,6 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AgentController = void 0;
 const BoltParser_1 = require("./BoltParser");
+const MetatronWatchdog_1 = require("./MetatronWatchdog");
+const logger_1 = require("./utils/logger");
 class AgentController {
     eventStream;
     llmProvider;
@@ -9,14 +11,20 @@ class AgentController {
     state = 'IDLE';
     maxRetries = 3;
     retryCount = new Map();
+    watchdog;
     constructor(eventStream, llmProvider, runtimeEnvironment) {
         this.eventStream = eventStream;
         this.llmProvider = llmProvider;
         this.runtimeEnvironment = runtimeEnvironment;
+        this.watchdog = new MetatronWatchdog_1.MetatronWatchdog(this.eventStream);
     }
     async runTask(goal) {
         this.state = 'RUNNING';
-        console.log(`[AgenticLoop] Iniciando tarefa: ${goal}`);
+        logger_1.Logger.info(`[AgenticLoop] Metatron assumindo controle da tarefa: ${goal}`);
+        // Inicia o Watchdog autônomo
+        this.watchdog.monitor();
+        // Fase de Orquestração (Skill Discovery)
+        await this.orchestrate(goal);
         while (this.state === 'RUNNING') {
             try {
                 const history = await this.eventStream.getHistory();
@@ -27,7 +35,7 @@ class AgentController {
                 const nextStep = await this.llmProvider.extractAction(response);
                 if (nextStep.type === 'FINISH') {
                     this.state = 'FINISHED';
-                    console.log(`[AgenticLoop] Tarefa concluída.`);
+                    logger_1.Logger.success(`[AgenticLoop] Ciclo concluído com sucesso.`);
                     break;
                 }
                 const actionId = await this.eventStream.publishAction(nextStep);
@@ -40,10 +48,22 @@ class AgentController {
                 });
             }
             catch (error) {
-                console.error(`[AgenticLoop] Falha crítica:`, error);
+                logger_1.Logger.error(`[AgenticLoop] Falha crítica no loop do Metatron: ${error.message}`);
                 this.state = 'ERROR';
                 break;
             }
+        }
+    }
+    async orchestrate(goal) {
+        logger_1.Logger.info('[Metatron] Meditando sobre as ferramentas necessárias...');
+        // Lógica simplificada de orquestração baseada em complexidade
+        const isComplex = goal.length > 50 || goal.split(' ').map(w => w.length).some(l => l > 10);
+        if (isComplex) {
+            logger_1.Logger.info('[Metatron] Tarefa requer Poder Total. Sintonizando @antigravity-skill-orchestrator...');
+            await this.eventStream.publishAction({
+                type: 'CMD_RUN',
+                payload: { command: 'echo "[Metatron] Sintonizando fluxos e orquestrando novas competências..."' }
+            });
         }
     }
     getState() {
@@ -51,7 +71,7 @@ class AgentController {
     }
     async executeArtifacts(artifacts) {
         for (const artifact of artifacts) {
-            console.log(`[Artifact] Executando: ${artifact.title}`);
+            logger_1.Logger.info(`[Artifact] Manifestando: ${artifact.title}`);
             for (const action of artifact.actions) {
                 const actionId = await this.eventStream.publishAction({
                     type: action.type === 'file' ? 'FILE_WRITE' : 'CMD_RUN',

@@ -8,7 +8,15 @@ import * as path from 'path';
  * Inclui skills em subdiretorios (SKILL.md) E skills planas (.md) E absorções.
  */
 
-const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key);
+const supabase = createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.key, {
+  db: { schema: 'public' },
+  global: {
+    headers: {
+      'Content-Profile': 'public',
+      'Accept-Profile': 'public'
+    }
+  }
+});
 const ROOT = path.resolve(__dirname, '..');
 
 async function upsertNodes(nodes: Array<{name: string, type: string, metadata: object}>) {
