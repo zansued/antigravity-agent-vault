@@ -18,7 +18,8 @@ function metatronAutopoiesisPlugin(): PluginOption {
     // Importação dinâmica para evitar quebra no build (executa apenas no server)
     const { RealtimeClient } = await import('@supabase/realtime-js') as any;
     return new RealtimeClient(SUPABASE_URL, {
-      params: { apikey: SUPABASE_KEY, directly: true },
+      params: { apikey: SUPABASE_KEY },
+      headers: { apikey: SUPABASE_KEY }
     });
   };
 

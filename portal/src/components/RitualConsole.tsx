@@ -99,11 +99,14 @@ export function RitualConsole() {
         }
         return prevNodes;
       });
-    }).subscribe((status: string) => {
+    }).subscribe((status: string, err?: any) => {
       if (status === 'SUBSCRIBED') {
         console.log('[Supabase Realtime] Inscrito com sucesso nos nodos diretamente.');
       } else {
-        console.error('[Supabase Realtime] Erro na inscrição direta:', status);
+        console.error(`[Supabase Realtime] Erro na inscrição direta (${status}):`, err || 'Erro desconhecido');
+        if (status === 'CHANNEL_ERROR') {
+          console.warn('[Metatron] Possível problema de permissões RLS ou API Key no Ledger.');
+        }
       }
     });
 
