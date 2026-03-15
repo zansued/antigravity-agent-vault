@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --celestial-neon: #22d3ee; /* Cor padrão */
+}
+
+body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+/* Aplicar a variável dinâmica em classes específicas */
+.text-celestial-neon {
+  color: var(--celestial-neon);
+}
+
+.border-celestial-neon {
+  border-color: var(--celestial-neon);
+}
+
+.bg-celestial-neon {
+  background-color: var(--celestial-neon);
+}

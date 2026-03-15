@@ -1,0 +1,280 @@
+{
+  "618c62d56de807810f584eaaaa5c1eef": {
+    "nodes": [],
+    "links": []
+  },
+  "d253f374d513b70af7e94653e41811d6": {
+    "nodes": [
+      {
+        "name": "TTS",
+        "type": "DOMAIN"
+      },
+      {
+        "name": "Vocoder",
+        "type": "MODULE"
+      },
+      {
+        "name": "Synthesizer",
+        "type": "ORCHESTRATOR"
+      },
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "Model Manager",
+        "type": "MODULE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "TTS",
+        "targetName": "Vocoder",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "353d9e124426210769df5552fa53fd9a": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "API",
+        "targetName": "CLI",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "343059e19cfe805c6fa598f9c30449ba": {
+    "nodes": [
+      {
+        "name": "LangGraph",
+        "type": "ORCHESTRATOR"
+      },
+      {
+        "name": "StateGraph",
+        "type": "CONCEPT"
+      },
+      {
+        "name": "Checkpointer",
+        "type": "MODULE"
+      },
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "LangGraph",
+        "targetName": "StateGraph",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "fb4648a3688b45790295370624d0d80c": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "API",
+        "targetName": "CLI",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "7af59816fc064a403f9d0791345c7448": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "04cbd88ad3f51b6d09a4f2850b04d0a6": {
+    "nodes": [
+      {
+        "name": "TTS",
+        "type": "DOMAIN"
+      },
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "TTS",
+        "targetName": "API",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "d372062c12099a8770945d8e1f086e35": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "6811f22ec88a73bff0e96203c770a9b0": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "7a9c71859adbdf1e773bf62a92620b32": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "API",
+        "targetName": "CLI",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "6dd16db9bac695fc791a745a6ace6f07": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "2ddb8a85ead597c345bf7c3ec53e1f0b": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "API",
+        "targetName": "CLI",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "11a5a2dacbaab29a453881aa3b340966": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "f41ab9320c7f51156ef8713f366d3a9a": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "f2c536e524047e8b4ba29c35f64d6078": {
+    "nodes": [
+      {
+        "name": "Handoff",
+        "type": "CONCEPT"
+      },
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      },
+      {
+        "name": "CLI",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": [
+      {
+        "sourceName": "Handoff",
+        "targetName": "API",
+        "relationType": "INTEGRATES"
+      }
+    ]
+  },
+  "e240123844c3cb16af193c5f62bfe1ba": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "cd71ee67814e4ecbaf4a1dbdd25c919e": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "e98abf5ea86e5f78266481daf456319f": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  },
+  "713e1243ba8c0b88cbec23f8bd000a17": {
+    "nodes": [
+      {
+        "name": "API",
+        "type": "INTERFACE"
+      }
+    ],
+    "links": []
+  }
+}
