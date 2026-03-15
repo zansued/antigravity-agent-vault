@@ -37,9 +37,31 @@ Este repositório documenta a evolução arquitetural e técnica do **Gemini CLI
 ---
 
 ## 🛠️ Estrutura do Repositório
-*   `/skills`: Definições `.SKILL.md` instaláveis no Gemini CLI.
-*   `/reports`: Relatórios de absorção profunda de cada framework.
-*   `/blueprints`: Diagramas e especificações técnicas de arquitetura.
+*   `/src`: Core Engine do Metatron v2.0 (Orquestração & Watchdog).
+*   `/portal`: Interface Visual (Canvas Celestial).
+*   `/skills`: Definições `.SKILL.md` (Total: 1.259+ competências).
+*   `/reports`: Relatórios de absorção profunda.
+*   `/blueprints`: Diagramas e especificações de arquitetura.
+
+---
+
+## 🚀 Como Executar o Metatron
+
+Para iniciar o motor agente no Vault:
+
+1.  **Modo de Demonstração:**
+    ```powershell
+    npx ts-node src/demo.ts
+    ```
+2.  **Verificação de Poderes (v2.0):**
+    ```powershell
+    npx ts-node src/verify-metatron-upgrade.ts
+    ```
+3.  **Portal Visual:**
+    ```powershell
+    cd portal
+    npm run dev
+    ```
 
 ---
 
