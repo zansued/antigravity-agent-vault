@@ -15,7 +15,16 @@ async function verifyUpgrade() {
   await ledger.indexSkills(skillsDir);
 
   // 2. Verificação de orquestração básica
-  const controller = new AgentController(eventStream, {}, {});
+  const mockLLM = {
+    generateResponse: async () => "<boltArtifact id='test' title='Test'><boltAction type='shell'>echo 'Verified'</boltAction></boltArtifact>",
+    extractAction: async () => ({ type: 'FINISH', payload: {} })
+  };
+  const mockRuntime = {
+    execute: async () => ({ output: 'Success', error: null }),
+    writeFile: async () => ({ success: true })
+  };
+
+  const controller = new AgentController(eventStream, mockLLM, mockRuntime);
   await controller.runTask("Upgrade the system to support autonomous vision and watchdog capabilities.");
 }
 
