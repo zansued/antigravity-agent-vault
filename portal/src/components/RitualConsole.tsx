@@ -40,6 +40,7 @@ export function RitualConsole() {
   const [loadingText, setLoadingText] = useState("MEDITANDO")
   const [nodes, setNodes] = useState<SupabaseNode[]>([])
   const [currentLogs, setCurrentLogs] = useState<RealtimeLog[]>([])
+  const [isVoiceOpen, setIsVoiceOpen] = useState(true)
   const socketRef = useRef<Socket | null>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
 
@@ -269,11 +270,18 @@ export function RitualConsole() {
       </div>
 
       {/* Input Area */}
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-celestial-neon to-celestial-magic rounded-3xl blur opacity-10 group-focus-within:opacity-30 transition duration-500" />
-        
-        <div className="relative flex items-center gap-4 bg-slate-900 border border-white/10 rounded-2xl p-2 pl-6 shadow-2xl">
-          <Command className="w-5 h-5 text-slate-500" />
+      <div className="relative z-20">
+        <div className="relative flex items-center gap-4 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-6 shadow-2xl group transition-all focus-within:border-celestial-neon/50">
+          <div className="flex items-center gap-2 mr-2">
+            <Command className="w-5 h-5 text-slate-500" />
+            <button 
+              onClick={() => setIsVoiceOpen(!isVoiceOpen)}
+              className={`p-2 rounded-lg transition-all ${isVoiceOpen ? 'bg-celestial-neon/20 text-celestial-neon' : 'text-slate-500 hover:text-white'}`}
+              title="Alternar Interface de Voz"
+            >
+              <Activity size={16} />
+            </button>
+          </div>
           <input 
             type="text"
             value={input}
@@ -286,24 +294,43 @@ export function RitualConsole() {
           <button 
             onClick={handleSend}
             disabled={isProcessing}
-            className="p-3 bg-celestial-neon text-black rounded-xl hover:bg-white transition-all active:scale-95 disabled:opacity-50"
+            className="p-3 bg-celestial-neon text-black rounded-xl hover:bg-white transition-all active:scale-95 disabled:opacity-50 font-bold flex items-center gap-2"
           >
-            <Send className="w-5 h-5" />
+            <span className="hidden sm:inline">TECER</span>
+            <Send className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Floating Voice Interface - Moved to clear sidebar and registry panel */}
-      <div className="fixed bottom-10 left-24 w-80 z-[100] block">
-        <VoiceInterface 
-          onCommand={(cmd) => {
-            const processed = processText(cmd);
-            if (!processed) {
-              handleSendDirect(cmd);
-            }
-          }}
-        />
-      </div>
+      {/* Floating Voice Interface - Improved Positioning */}
+      <AnimatePresence>
+        {isVoiceOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-28 left-8 w-80 z-[100]"
+          >
+            <div className="relative">
+              {/* Close Button for Voice Card */}
+              <button 
+                onClick={() => setIsVoiceOpen(false)}
+                className="absolute -top-2 -right-2 w-6 h-6 bg-slate-800 border border-white/10 rounded-full flex items-center justify-center text-white/50 hover:text-white z-10"
+              >
+                ×
+              </button>
+              <VoiceInterface 
+                onCommand={(cmd) => {
+                  const processed = processText(cmd);
+                  if (!processed) {
+                    handleSendDirect(cmd);
+                  }
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
