@@ -11,13 +11,15 @@ function metatronAutopoiesisPlugin(): PluginOption {
   let supabaseClient: any;
 
   const SUPABASE_URL = 'https://supa.techstorebrasil.com';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE3MTgwOTUyMDAKfQ.1w168CO-icK3_NsOLyNllE35tVAKmv5ygfnE_AgbMGs';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MTUwNTA4MDAsCiAgImV4cCI6IDE4NzI4MTcyMDAKfQ.1w168CO-icK3_NsOLyNllE35tVAKmv5ygfnE_AgbMGs';
 
   // Função para inicializar o cliente Supabase com Realtime
   const initSupabaseRealtime = async () => {
     // Importação dinâmica para evitar quebra no build (executa apenas no server)
     const { RealtimeClient } = await import('@supabase/realtime-js') as any;
-    return new RealtimeClient(SUPABASE_URL, {
+    // Converte https para wss e garante o sufixo /realtime/v1/websocket
+    const wsUrl = SUPABASE_URL.replace('http', 'ws') + '/realtime/v1/websocket';
+    return new RealtimeClient(wsUrl, {
       params: { apikey: SUPABASE_KEY },
       headers: { apikey: SUPABASE_KEY }
     });

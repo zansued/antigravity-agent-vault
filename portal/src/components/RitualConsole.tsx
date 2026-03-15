@@ -74,13 +74,9 @@ export function RitualConsole() {
       // Futuramente, adicionar lógica para atualizar ou adicionar links no estado se necessário.
     });
 
-    // Conectar e Inscrever no Supabase Realtime diretamente (para garantir que o listener funciona mesmo que o Socket.io demore)
-    const channel = supabase.channel('metatron-realtime-changes', { 
-      config: { 
-        broadcast: { self: true }, 
-        presence: { key: 'default-key' } // Chave de presença, pode ser adaptada se necessário
-      }
-    });
+    // Conectar e Inscrever no Supabase Realtime diretamente
+    const channelName = `metatron-nodes-${Math.random().toString(36).substring(7)}`;
+    const channel = supabase.channel(channelName);
 
     channel.on('postgres_changes', {
       event: '*', 
@@ -103,9 +99,10 @@ export function RitualConsole() {
       if (status === 'SUBSCRIBED') {
         console.log('[Supabase Realtime] Inscrito com sucesso nos nodos diretamente.');
       } else {
-        console.error(`[Supabase Realtime] Erro na inscrição direta (${status}):`, err || 'Erro desconhecido');
+        console.error(`[Supabase Realtime] Erro na inscrição direta (${status}):`, err);
         if (status === 'CHANNEL_ERROR') {
-          console.warn('[Metatron] Possível problema de permissões RLS ou API Key no Ledger.');
+          console.warn('[Metatron] Tentando reconectar Linhas de Ley...');
+          setTimeout(() => channel.subscribe(), 5000);
         }
       }
     });
