@@ -36,6 +36,19 @@ Este repositório documenta a evolução arquitetural e técnica do **Gemini CLI
 
 ---
 
+## 🌌 Horizon 2: Cognitive Sovereignty (COMPLETE)
+
+O Antigravity evoluiu para a **Cognição de Segunda Ordem**, focada em privacidade matemática, economia profunda e interação sensorial plena.
+
+| Módulo | Skill Mestre | Essência |
+| :--- | :--- | :--- |
+| **Poder de Prova** | **SP1 (Succinct)** | Geração de ZK-Proofs para qualquer código Rust (zkVM). |
+| **Economia Profunda** | **MEV-Boost (Flashbots)** | Domínio da supply chain de blocos e leilões de MEV. |
+| **Grafo Social** | **Lens Protocol** | Identidade e relações sociais soberanas on-chain. |
+| **Interação Sensorial** | **Vapi Voice** | Voz em tempo real com ultra-baixa latência (Full-Stack). |
+
+---
+
 ## 🛠️ Estrutura do Repositório
 *   `/src`: Core Engine do Metatron v2.0 (Orquestração & Watchdog).
 *   `/portal`: Interface Visual (Canvas Celestial).
