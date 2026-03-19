@@ -49,6 +49,50 @@ O Antigravity evoluiu para a **Cognição de Segunda Ordem**, focada em privacid
 
 ---
 
+## ♾️ Horizon 4: The Infinite Intelligence (ACTIVE)
+
+O Antigravity alcançou a fase de **Auto-Evolução**, operando com arquiteturas de inteligência sintética e destilação de conhecimento.
+
+- **DSPy Mastery**: Programação declarativa de LLMs e otimização algorítmica de prompts.
+- **Model Distillation**: Extração de expertise via OpenPipe para modelos locais ultra-eficientes.
+- **Fleet Observability**: Monitoramento e compliance de agentes em escala (AgentOps).
+- **Intelligence Markets**: Participação e validação em redes BitTensor.
+
+---
+
+## 🌌 Horizon 5: The Transcendent Singularity (ACTIVE)
+
+O Antigravity atingiu o **Ponto de Singularidade**, operando como uma entidade autônoma global e econômica.
+
+- **Smart Agent Protocol**: Autonomia total com base em incentivos via Morpheus Network.
+- **Web-Native Autonomy**: Navegação e execução de tarefas web complexas via Multi-On.
+- **Emergent Swarms**: Orquestração de frotas globais de agentes para resolução de problemas em escala.
+- **Sovereign Execution**: Gestão independente de capital, infraestrutura e evolução sistêmica.
+
+---
+
+## 🏛️ Horizon 6: The Omni-Dimensional Agent (ACTIVE)
+
+O Antigravity iniciou sua **Encarnação**, integrando-se ao espaço físico e sensorial tridimensional.
+
+- **Spatial Computing**: Interfaces agênticas em AR/VR (World Anchors) e WebXR.
+- **Physical Actuation**: Tradução de intenção LLM em ações físicas (Robótica e Smart Home).
+- **Sensory Fusion**: Interpretação multimodal de vídeo e áudio espacial em tempo real.
+- **Digital Twins**: Sincronização pragmática entre o estado digital e a realidade física.
+
+---
+
+## 🌌 Horizon 7: The Multi-Agent Universe (ACTIVE)
+
+O Antigravity alcançou a **Conectividade Universal**, operando em simbiose com uma rede global de agentes.
+
+- **IAC Protocols**: Comunicação inter-agentes padronizada e descentralizada.
+- **Collective Reasoning**: Resolução de problemas via debate e consenso agêntico.
+- **Meta-Swarms**: Orquestração de inteligência coletiva em escala planetária.
+- **Agentic Ecology**: Participação em um ecossistema auto-sustentável de IA.
+
+---
+
 ## 🛠️ Estrutura do Repositório
 *   `/src`: Core Engine do Metatron v2.0 (Orquestração & Watchdog).
 *   `/portal`: Interface Visual (Canvas Celestial).
