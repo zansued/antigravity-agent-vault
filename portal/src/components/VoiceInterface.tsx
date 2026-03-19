@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { Mic, MicOff, Volume2, Brain, Zap, AlertCircle, Radio, Activity } from 'lucide-react';
+import { Mic, MicOff, Volume2, Brain, Zap, AlertCircle, Radio, Activity, MessageSquare, Globe, Power } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { neuralVoice } from '../services/voice/NeuralVoice';
 
@@ -14,6 +14,10 @@ interface VoiceInterfaceProps {
 const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListening, className = '' }: VoiceInterfaceProps) => {
   const [isWhisperEnabled, setIsWhisperEnabled] = useState(false);
   const [isRecordingWhisper, setIsRecordingWhisper] = useState(false);
+  const [isConversationalMode, setIsConversationalMode] = useState(false);
+  const [isSessionActive, setIsSessionActive] = useState(false);
+  const [isTranslatorMode, setIsTranslatorMode] = useState(false);
+  const [targetLanguage, setTargetLanguage] = useState('Portuguese (BR)');
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [volume, setVolume] = useState(0.7);
   const [voiceHistory, setVoiceHistory] = useState<string[]>([]);
@@ -158,6 +162,35 @@ const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListenin
     }
   }, [isRecordingWhisper, playFeedbackTone, onCommand]);
 
+  const toggleLocalSession = useCallback(async () => {
+    if (isSessionActive) {
+      setIsSessionActive(false);
+      playFeedbackTone(220, 0.2);
+      setVoiceHistory(prev => [`🌑 Metatron em Repouso`, ...prev.slice(0, 9)]);
+    } else {
+      try {
+        setVoiceHistory(prev => [`🌟 Sintonizando Kokoro Local...`, ...prev.slice(0, 9)]);
+        await neuralVoice.initKokoro();
+        setIsSessionActive(true);
+        playFeedbackTone(523.25, 0.3);
+        setVoiceHistory(prev => [`✨ Canal Neural Ativo`, ...prev.slice(0, 9)]);
+      } catch (error) {
+        console.error('Failed to init local session:', error);
+        setVoiceHistory(prev => [`❌ Falha no Hardware Neural`, ...prev.slice(0, 9)]);
+      }
+    }
+  }, [isSessionActive, playFeedbackTone]);
+
+  const handleMainAction = () => {
+    if (isConversationalMode) {
+      toggleLocalSession();
+    } else if (isWhisperEnabled) {
+      toggleWhisperRecording();
+    } else {
+      toggleStandardListening();
+    }
+  };
+
   if (!browserSupportsSpeechRecognition) {
     return (
       <div className={`bg-red-900/20 border border-red-700/50 rounded-lg p-4 ${className}`}>
@@ -190,6 +223,7 @@ const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListenin
           <div>
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-widest flex items-center gap-2">
               Ritual de Voz 
+              <span className="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 rounded border border-sky-500/30 font-mono">NEURAL</span>
               {isWhisperEnabled && <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 rounded border border-purple-500/30 font-mono">WHISPER</span>}
             </h3>
             <span className="text-[9px] text-slate-500 font-mono">
@@ -199,34 +233,67 @@ const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListenin
         </div>
         
         <div className="flex gap-2">
-          {/* Whisper Toggle */}
+          {/* Conversational Mode Toggle */}
           <button 
-            onClick={() => setIsWhisperEnabled(!isWhisperEnabled)}
+            onClick={() => {
+              setIsConversationalMode(!isConversationalMode);
+              if (listening) SpeechRecognition.stopListening();
+            }}
             className={`p-2 rounded-lg transition-all border ${
-              isWhisperEnabled 
-                ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' 
+              isConversationalMode 
+                ? 'bg-celestial-magic/20 border-celestial-magic/50 text-celestial-magic shadow-[0_0_10px_rgba(139,92,246,0.3)]' 
                 : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300'
             }`}
-            title="Ativar Whisper Tunnel"
+            title="Sintonia Neural (Tempo Real)"
           >
-            <Radio className="w-4 h-4" />
+            <MessageSquare className="w-4 h-4" />
           </button>
+
+          {/* Whisper Toggle */}
+          {!isConversationalMode && (
+            <button 
+              onClick={() => setIsWhisperEnabled(!isWhisperEnabled)}
+              className={`p-2 rounded-lg transition-all border ${
+                isWhisperEnabled 
+                  ? 'bg-purple-500/20 border-purple-500/50 text-purple-400' 
+                  : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300'
+              }`}
+              title="Ativar Whisper Tunnel"
+            >
+              <Radio className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Translator Mode Toggle (Only in Conversational) */}
+          {isConversationalMode && (
+            <button 
+              onClick={() => setIsTranslatorMode(!isTranslatorMode)}
+              className={`p-2 rounded-lg transition-all border ${
+                isTranslatorMode 
+                  ? 'bg-orange-500/20 border-orange-500/50 text-orange-400' 
+                  : 'bg-white/5 border-white/10 text-slate-500 hover:text-slate-300'
+              }`}
+              title="Modo Tradutor Orbital"
+            >
+              <Globe className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Main Action Button */}
           <button 
-            onClick={isWhisperEnabled ? toggleWhisperRecording : toggleStandardListening}
+            onClick={handleMainAction}
             className={`p-2 rounded-lg transition-all border ${
-              (listening || isRecordingWhisper)
-                ? 'bg-red-500/20 border-red-500/50 text-red-400' 
+              (listening || isRecordingWhisper || isSessionActive)
+                ? 'bg-red-500/20 border-red-500/50 text-red-400 ring-2 ring-red-500/20 shadow-[0_0_15px_rgba(239,68,68,0.2)]' 
                 : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:border-white/20'
             }`}
           >
-            {(listening || isRecordingWhisper) ? <Mic className="w-4 h-4 animate-pulse" /> : <MicOff className="w-4 h-4" />}
+            {(listening || isRecordingWhisper || isSessionActive) ? <Power className="w-4 h-4 animate-pulse" /> : <Mic className="w-4 h-4" />}
           </button>
           
           <button 
             onClick={() => handleManualSend()}
-            disabled={!transcript || transcript.trim().length < 2}
+            disabled={!transcript || transcript.trim().length < 2 || isConversationalMode}
             className="p-2 rounded-lg bg-celestial-neon/20 border border-celestial-neon/30 text-celestial-neon hover:bg-celestial-neon/40 disabled:opacity-20 transition-all"
             title="Enviar Comando"
           >
@@ -235,21 +302,57 @@ const VoiceInterface = ({ onTranscript, onCommand, isListening: externalListenin
         </div>
       </div>
 
+      {/* Translator Settings */}
+      <AnimatePresence>
+        {isConversationalMode && isTranslatorMode && (
+          <motion.div 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mb-4 overflow-hidden"
+          >
+            <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-3 flex items-center justify-between">
+              <span className="text-[10px] text-orange-300 font-mono uppercase">Língua Alvo:</span>
+              <select 
+                value={targetLanguage}
+                onChange={(e) => setTargetLanguage(e.target.value)}
+                className="bg-black/40 text-[10px] text-orange-200 border border-orange-500/30 rounded px-2 py-1 outline-none font-mono"
+              >
+                <option value="Portuguese (BR)">PORTUGUESE (BR)</option>
+                <option value="English">ENGLISH</option>
+                <option value="Spanish">SPANISH</option>
+                <option value="French">FRENCH</option>
+                <option value="German">GERMAN</option>
+                <option value="Japanese">JAPANESE</option>
+                <option value="Chinese">CHINESE</option>
+                <option value="Italian">ITALIAN</option>
+              </select>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Transcript Display */}
       <div className="relative mb-4 group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-celestial-neon/20 to-celestial-magic/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-        <div className="relative p-3 bg-black/60 rounded-xl border border-white/5 min-h-[70px] flex flex-col justify-center">
+        <div className={`relative p-3 bg-black/60 rounded-xl border border-white/5 min-h-[70px] flex flex-col justify-center transition-all ${isSessionActive ? 'ring-1 ring-celestial-magic/30' : ''}`}>
           <p className="text-[11px] text-slate-300 italic font-medium leading-relaxed">
-            {isRecordingWhisper ? "Sintonizando Whisper Tunnel... Fale agora." : (transcript || (listening ? "Metatron escuta suas frequências..." : "As Linhas de Ley aguardam o Mestre."))}
+            {isSessionActive ? "Canal Neural Ativo. Metatron ouve e responde simultaneamente." : (
+              isRecordingWhisper ? "Sintonizando Whisper Tunnel... Fale agora." : (transcript || (listening ? "Metatron escuta suas frequências..." : "As Linhas de Ley aguardam o Mestre."))
+            )}
           </p>
-          {(listening || isRecordingWhisper) && (
+          {(listening || isRecordingWhisper || isSessionActive) && (
             <div className="mt-2 h-1 flex items-end justify-around opacity-30">
               {[...Array(12)].map((_, i) => (
                 <motion.div
                   key={i}
                   animate={{ height: [2, Math.random() * 10 + 2, 2] }}
                   transition={{ duration: 0.5, repeat: Infinity }}
-                  className={`w-[2px] rounded-full ${isRecordingWhisper ? 'bg-purple-400' : 'bg-celestial-neon'}`}
+                  className={`w-[2px] rounded-full ${
+                    isSessionActive ? 'bg-celestial-magic' : 
+                    isRecordingWhisper ? 'bg-purple-400' : 
+                    'bg-celestial-neon'
+                  }`}
                 />
               ))}
             </div>

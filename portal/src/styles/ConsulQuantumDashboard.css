@@ -1,0 +1,29 @@
+```css
+.consul-quantum-dashboard {
+  background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+  color: #ecf0f1;
+  padding: 20px;
+  border-radius: 15px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #3498db;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 24px;
+  background: linear-gradient(45deg, #3498db, #9b59b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.quantum-state-indicator {
+  padding: 8px 16px;
+  background: rgba(52, 152, 219, 0.

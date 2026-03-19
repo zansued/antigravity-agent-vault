@@ -9,13 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@elevenlabs/client": "^0.15.1",
     "@supabase/realtime-js": "^2.99.1",
     "@supabase/supabase-js": "^2.43.0",
     "@tailwindcss/typography": "^0.5.19",
     "@types/react-speech-recognition": "^3.9.6",
     "clsx": "^2.1.1",
     "framer-motion": "^12.36.0",
+    "kokoro-js": "^1.2.1",
     "lucide-react": "^0.577.0",
+    "onnxruntime-web": "^1.24.3",
     "prismjs": "^1.30.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

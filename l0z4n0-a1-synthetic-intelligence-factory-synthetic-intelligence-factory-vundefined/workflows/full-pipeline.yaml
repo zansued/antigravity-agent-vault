@@ -1,0 +1,70 @@
+workflow_name: full_pipeline
+description: >
+  Complete manufacturing pipeline from domain selection to deployed intelligence.
+  4 stages, progressive quality gates, 8-24 weeks depending on depth.
+
+agent_sequence:
+  - agent: factory
+    role: orchestrator
+    action: "Triage domain, assess feasibility, initiate pipeline"
+
+  - agent: extractor
+    role: executor
+    action: "Execute 4-phase extraction pipeline"
+    task: extract-expertise
+    gate: "Extraction quality checklist 100% pass"
+
+  - agent: assembler
+    role: executor
+    action: "Build system prompt + KB + calibration form"
+    task: assemble-intelligence
+    gate: "Assembly checklist pass"
+
+  - agent: validator
+    role: executor
+    action: "Run 3-tier validation"
+    task: validate-intelligence
+    gate: "Tier 1 = 100%, Tier 2 >= 85%, Ethics = 100%"
+
+  - agent: calibrator
+    role: executor
+    action: "Calibrate for target context and deploy"
+    task: calibrate-intelligence
+    gate: "Deployment checklist pass + 5 test queries successful"
+
+  - agent: factory
+    role: orchestrator
+    action: "Final review, generate project report, archive"
+
+transitions:
+  extract_to_assemble:
+    condition: "Extraction quality checklist 100% pass"
+    on_fail: "Return to relevant extraction phase, fix gaps"
+
+  assemble_to_validate:
+    condition: "Assembly checklist pass"
+    on_fail: "Fix assembly issues, reverify transfer completeness"
+
+  validate_to_calibrate:
+    condition: "Tier 1 = 100% AND Tier 2 >= 85%"
+    on_fail_tier1: "Fix structural issues, do not proceed to Tier 2"
+    on_fail_tier2_below_70: "Major rework — return to extraction/assembly"
+    on_fail_tier2_70_85: "Refine weak categories, retest Tier 2"
+
+  calibrate_to_production:
+    condition: "Deployment checklist pass"
+    on_fail: "Fix deployment issues, rerun test queries"
+
+success_indicators:
+  - "System prompt: 15,000-25,000 words across 7 layers"
+  - "Knowledge base: 50+ documents with complete index"
+  - "Calibration form: All 7 sections completed"
+  - "Tier 1: 100% structural pass"
+  - "Tier 2: 85%+ behavioral score"
+  - "5 deployment test queries successful"
+  - "Monitoring and feedback mechanisms active"
+
+timeline:
+  fast_track: "8-12 weeks"
+  recommended: "12-24 weeks"
+  per_additional_intelligence: "2-4 months (methodology known)"

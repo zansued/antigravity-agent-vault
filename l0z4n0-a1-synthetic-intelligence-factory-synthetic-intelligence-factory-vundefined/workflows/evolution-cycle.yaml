@@ -1,0 +1,90 @@
+workflow_name: evolution_cycle
+description: "Self-improvement cycle that audits squad health, identifies gaps, recalibrates behaviors, and plans versioned evolution. Run monthly or after 50 interactions."
+
+trigger:
+  schedule: monthly
+  on_demand: "*evolve or *full-cycle command"
+  threshold: "After 50 user interactions"
+
+agent_sequence:
+  - agent: meta
+    role: monitor
+    action: "M1: Run cognitive depth audit across all agents"
+    output: "health_report"
+    gate: "Composite score calculated, degradation flagged if any dimension < 7.0"
+
+  - agent: meta
+    role: curator
+    action: "M2: Identify knowledge gaps from usage patterns"
+    input: "usage_data + health_report"
+    output: "knowledge_gaps"
+    gate: "All critical gaps documented with proposed fixes"
+
+  - agent: meta
+    role: calibrator
+    action: "M3: Compare recommendations against actual outcomes"
+    input: "interaction_logs + outcomes_data"
+    output: "calibration_report"
+    gate: "Systematic biases identified and adjustments proposed"
+
+  - agent: meta
+    role: planner
+    action: "M4: Generate versioned evolution plan"
+    input: "health_report + knowledge_gaps + calibration_report"
+    output: "evolution_plan"
+    gate: "Plan includes evidence-based changes with effort estimates"
+
+  - agent: factory
+    role: reviewer
+    action: "Review evolution plan for pipeline consistency"
+    input: "evolution_plan"
+    output: "reviewed_plan"
+    gate: "No proposed changes break pipeline flow"
+
+  - agent: factory
+    role: executor
+    action: "Execute approved evolution changes by type"
+    input: "reviewed_plan + operator_approval"
+    output: "execution_report"
+    gate: "All approved changes applied, tested, and verified"
+    implementation_rules:
+      patch: "Apply directly to target agent/config file. Rerun affected quality checks."
+      enhancement: "Draft change, run M1 on affected agent before/after. Verify no regression."
+      new_capability: "Create new component. Run full squad validate. Update squad.yaml."
+      deprecation: "Remove component. Verify no broken references. Update squad.yaml."
+    rollback: "If any change degrades squad composite by >0.3, revert and escalate to operator."
+    post_execution: "Run M1 health audit on changed agents. Compare pre/post scores. Document in execution_report."
+
+transitions:
+  m1_to_m2:
+    condition: "Health report generated"
+    on_fail: "Retry audit with more data"
+
+  m2_to_m3:
+    condition: "Knowledge gaps documented"
+    on_fail: "Flag insufficient usage data, proceed with available"
+
+  m3_to_m4:
+    condition: "Calibration report complete"
+    on_fail: "Flag insufficient outcome data, plan based on M1+M2"
+
+  m4_to_review:
+    condition: "Evolution plan generated"
+    on_fail: "Escalate to operator — insufficient data for planning"
+
+  review_to_execute:
+    condition: "Operator approves evolution plan"
+    on_fail: "Revise plan based on operator feedback"
+
+  execute_to_verify:
+    condition: "All approved changes applied and tested"
+    on_fail: "Rollback failed changes, report partial execution to operator"
+
+success_indicators:
+  - "Health report with per-agent composite scores"
+  - "Knowledge gaps with severity and proposed fixes"
+  - "Calibration report with accuracy metrics"
+  - "Evolution plan with versioned changes and evidence"
+  - "Operator review gate enforced"
+  - "Execution report with pre/post scores for changed agents"
+  - "Squad composite maintained or improved post-evolution"

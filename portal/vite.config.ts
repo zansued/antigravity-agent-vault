@@ -208,23 +208,103 @@ function metatronAutopoiesisPlugin(): PluginOption {
             }
           });
         } else if (req.url === '/api/metatron-speech' && req.method === 'POST') {
-          // TTS Speech Proxy
+          // ElevenLabs Premium TTS Proxy
           let body = '';
           req.on('data', chunk => body += chunk.toString());
           req.on('end', async () => {
             try {
-              const { text } = JSON.parse(body);
-              console.log('[Metatron Speech] Gerando voz para:', text.substring(0, 30));
+              const { text, voiceId = 'pNInz6obpgmqSCAK6u6o', modelId = 'eleven_turbo_v2_5', stability = 0.4, similarity = 0.8 } = JSON.parse(body);
+              const apiKey = process.env.ELEVEN_API_KEY || process.env.ELEVENLABS_API_KEY;
               
-              // Fallback for now: Browser TTS is handled in the frontend if this fails
-              // To implement premium TTS: call OpenAI/DeepSeek TTS API and return the stream
-              res.writeHead(404); // Default to fail to trigger client-side fallback
-              res.end(JSON.stringify({ error: 'Premium Speech Tunnel não configurado.' }));
+              if (!apiKey) {
+                console.error('[Metatron Speech] Erro: Nenhuma chave API ElevenLabs encontrada.');
+                res.writeHead(500);
+                res.end(JSON.stringify({ error: 'ELEVENLABS_API_KEY não configurada' }));
+                return;
+              }
+              
+              console.log(`[Metatron Speech] Gerando voz ElevenLabs (${voiceId}) [Model: ${modelId}] para: ${text.substring(0, 30)}...`);
+              
+              const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream`, {
+                method: 'POST',
+                headers: {
+                  'xi-api-key': apiKey,
+                  'Content-Type': 'application/json',
+                  'accept': 'audio/mpeg'
+                },
+                body: JSON.stringify({
+                  text,
+                  model_id: modelId,
+                  voice_settings: {
+                    stability,
+                    similarity_boost: similarity,
+                    style: 0.0,
+                    use_speaker_boost: true
+                  }
+                })
+              });
+
+              if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error('[Metatron Speech] Erro na ElevenLabs:', response.status, errorData);
+                res.writeHead(response.status, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify(errorData));
+                return;
+              }
+
+              // Pipe the stream directly back to the client
+              res.writeHead(200, { 'Content-Type': 'audio/mpeg' });
+              const reader = response.body?.getReader();
+              if (reader) {
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  res.write(value);
+                }
+              }
+              res.end();
+
             } catch (err: any) {
+              console.error('[Metatron Speech] Erro crítico:', err.message);
               res.writeHead(500);
               res.end(JSON.stringify({ error: err.message }));
             }
           });
+        } else if (req.url?.startsWith('/api/get-signed-url') && req.method === 'GET') {
+          // ElevenLabs Signed URL for Conversational AI SDK
+          const url = new URL(req.url, `http://${req.headers.host}`);
+          const agentId = url.searchParams.get('agentId') || process.env.AGENT_ID ||'pNInz6obpgmqSCAK6u6o';
+          const apiKey = process.env.ELEVEN_API_KEY || process.env.ELEVENLABS_API_KEY;
+
+          if (!apiKey) {
+            console.error('[Metatron Auth] Erro: ELEVENLABS_API_KEY não configurada.');
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'ELEVENLABS_API_KEY não configurada no servidor.' }));
+            return;
+          }
+
+          try {
+            console.log(`[Metatron Auth] Gerando Signed URL para Agente: ${agentId}`);
+            const response = await fetch(
+              `https://api.elevenlabs.io/v1/convai/conversation/get-signed-url?agent_id=${agentId}`,
+              {
+                headers: { "xi-api-key": apiKey }
+              }
+            );
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(`Erro ElevenLabs (${response.status}): ${errorText}`);
+            }
+
+            const data = await response.json();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ signedUrl: data.signed_url }));
+          } catch (err: any) {
+            console.error('[Metatron Auth] Erro:', err.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: err.message }));
+          }
         } else {
           next();
         }

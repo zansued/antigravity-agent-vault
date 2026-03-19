@@ -1,0 +1,46 @@
+# Forged in the crucible. Every edge case earned, not assumed.
+name: synthetic-intelligence-factory
+version: 1.2.0
+description: "Meta-system that manufactures specialized AI intelligences from any professional domain. Distills elite expertise (top 0.1%) through systematic extraction and 7-layer cognitive architecture engineering. Produces system prompts (15k-25k words), knowledge bases (50-200 docs), and contextual calibration forms."
+slashPrefix: sif
+
+aios:
+  minVersion: "0.3.0"
+  type: squad
+
+components:
+  agents:
+    - factory.md
+    - extractor.md
+    - assembler.md
+    - validator.md
+    - calibrator.md
+    - meta.md
+  tasks:
+    - extract-expertise.md
+    - assemble-intelligence.md
+    - validate-intelligence.md
+    - calibrate-intelligence.md
+  workflows:
+    - full-pipeline.yaml
+    - evolution-cycle.yaml
+  config:
+    - seven-layer-template.md
+    - quality-standards.md
+
+metadata:
+  author: l0z4n0
+  license: MIT
+  tags:
+    - meta-system
+    - prompt-engineering
+    - cognitive-architecture
+    - expertise-distillation
+    - synthetic-intelligence
+    - knowledge-engineering
+    - system-prompt-generation
+  category: ai-engineering
+  pricing: free
+# ---
+# Forged by l0z4n0 | squads.sh
+# Quality: forge-polish depth 9.0/10 (v2)
