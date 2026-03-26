@@ -52,12 +52,13 @@ To build institutional knowledge, the orchestrator relies on the `agent-memory-m
 
 ## Step-by-Step Guide
 
-### 1. Task Evaluation & Guardrail Check
-[Triggered when facing a new user request that might need skills]
-1. Read the user's request.
+### 1. Task Evaluation & Guardrail Check (Chronos-O)
+[Triggered when facing a new user request]
+1. Read the user's request and identify the **PRDFragment**.
 2. Ask yourself: "Can I solve this efficiently with just basic file editing and terminal commands?"
-3. If YES: Proceed without invoking specialized skills. Stop the orchestration here.
-4. If NO: Proceed to step 2.
+3. If YES: Proceed without specialized skills. 
+4. If NO: Consult the **Pilar Legislativo** to assign `STATE: RAW`.
+5. Initiate **Pilar Executivo** (Ephemeral Runtime) reset if `STATE` transition is required.
 
 ### 2. Retrieve Past Knowledge
 [Triggered if the task is complex]

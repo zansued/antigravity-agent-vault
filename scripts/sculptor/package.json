@@ -1,0 +1,17 @@
+{
+  "name": "vault-token-sculptor",
+  "version": "1.0.0",
+  "description": "AST-based Token Sculpting Proxy for Antigravity Agent VAULT",
+  "main": "sculptor.ts",
+  "scripts": {
+    "start": "ts-node sculptor.ts"
+  },
+  "dependencies": {
+    "commander": "^11.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.1"
+  }
+}

@@ -12,10 +12,14 @@ Use this skill for complex, team-oriented projects that require dynamic agent as
 - **Notification Routing**: Intelligent routing of agent updates and taskboard status.
 - **Automatic Usage Monitor**: Tracks and reports token/cost usage after each agent operation.
 
-## How to Use
-1. **Assemble**: "Assemble a team for [complex task] using OmG".
-2. **Clean**: Use the provided hooks to maintain workspace hygiene.
-3. **Monitor**: Check the after-agent reports for context usage and cost.
+## Sovereign Commands (Chronos-O)
+- `/galta`: [G]lobal [A]sync [L]edger [T]racking [A]gent. Status e Sincronia.
+- `/chronos`: Ativação do Motor Omega (Alta Velocidade).
+- `/mapa`: Sincronia com Mapa Mental (Spatial Architect).
+- `/coliseu`: Debate Exponencial (20 Agentes).
+- `/dna`: Destilação e Gravação de Aprendizado.
+- `/lista`: Exibe TODOS os comandos e sub-agentes.
+- `/pulse`: Limpeza técnica e destilação de ouro.
 
 ## Requirements
 - **Runtime**: Node.js/NPM.
